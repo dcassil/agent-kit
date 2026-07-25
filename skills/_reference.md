@@ -1,7 +1,8 @@
 # Jira Reference (Shore Works)
 
-Shared constants, tools, and conventions used by every skill in
-`.agents/shared/skills/jira/` (this kit; `shared/` is the submodule mount). Skills link here instead of repeating this.
+Shared constants, tools, and conventions used by every Jira skill in this kit
+(`create-epic`, `create-feature`, `decompose-epic`, `decompose-feature`). Skills link here
+instead of repeating this.
 
 ## Site / IDs
 
@@ -34,7 +35,7 @@ Shared constants, tools, and conventions used by every skill in
   base-level and can't be parented below a Feature). Leaf work = **Subtask**.
 - Everything below Epic uses the **native `parent` field** — NOT issue links. (Issue links
   like `Duplicate`/`Relates` are only for cross-references, not the tier tree.)
-- Templates: `../../templates/jira/{EPIC,FEATURE,SUBTASK}.md`.
+- Templates: `../templates/jira/{EPIC,FEATURE,SUBTASK}.md`.
 
 ## Available Atlassian MCP tools (`Atlassian-Rovo-MCP`)
 
@@ -135,7 +136,7 @@ so you get related-ticket numbers and titles without expanding each one. Then
 1. **Read the live template first.** Always fetch
    `getJiraIssueTypeMetaWithFields` for the target issue type and use its
    description `defaultValue` as the source of truth. The files in
-   `../../templates/jira/` are the human-readable mirror; if they disagree,
+   `../templates/jira/` are the human-readable mirror; if they disagree,
    the Jira createmeta wins — flag the drift.
 2. **No placeholders survive.** A created ticket must have every `{{ ... }}`
    replaced. If a value is genuinely unknown, write the template's sanctioned

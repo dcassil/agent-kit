@@ -14,16 +14,24 @@ Both consumption modes use the same files — the plugin manifest is purely addi
 
 ```
 .claude-plugin/   # plugin.json (manifest) + marketplace.json (self-hosting marketplace)
-skills/           # agent skills (procedures an agent follows)
-  jira/           # create/decompose Epics, Features, Subtasks
-  teamwork-orchestration/   # multi-agent orchestration strategy
+skills/           # agent skills (procedures an agent follows) — each a top-level dir
+  _reference.md               # shared Jira constants/tools, linked by the jira skills
+  create-epic/                # create a top-tier Epic
+  create-feature/             # create a Feature under an Epic
+  decompose-epic/             # break an Epic into Features
+  decompose-feature/          # break a Feature into Subtasks
+  teamwork-orchestration/     # multi-agent orchestration strategy
 templates/        # human-readable mirrors of live templates. Currently: templates/jira/
 ```
 
-- `skills/jira/` — create/decompose Epics, Features, and Subtasks in Jira, with the shared
-  work-claim & lifecycle protocol in `skills/jira/_reference.md`.
-- `skills/teamwork-orchestration/` — orchestrator-owns-integration strategy for executing a
-  plan across a team of dispatched agents.
+Skills are **top-level dirs** under `skills/` (Claude Code plugin discovery only scans one
+level deep — `skills/<name>/SKILL.md`).
+
+- `create-epic` / `create-feature` / `decompose-epic` / `decompose-feature` — create and
+  decompose Epics, Features, and Subtasks in Jira, sharing the work-claim & lifecycle protocol
+  and IDs in `skills/_reference.md`.
+- `teamwork-orchestration` — orchestrator-owns-integration strategy for executing a plan
+  across a team of dispatched agents.
 - `templates/jira/` — `EPIC.md`, `FEATURE.md`, `SUBTASK.md` reference copies.
 
 ## Using agent-kit as a Claude Code plugin

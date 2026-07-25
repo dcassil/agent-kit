@@ -9,7 +9,7 @@ Create a **Feature** (issue type `Feature`, id `10013`, project **SCA**) as a ch
 
 ## Steps
 
-1. **Load the live template.** `getJiraIssueTypeMetaWithFields` (SCA, issueTypeId `10013`, `requiredFieldsOnly:false`). Source of truth = description `defaultValue`; cross-check `../../../templates/jira/FEATURE.md`; flag drift.
+1. **Load the live template.** `getJiraIssueTypeMetaWithFields` (SCA, issueTypeId `10013`, `requiredFieldsOnly:false`). Source of truth = description `defaultValue`; cross-check `../../templates/jira/FEATURE.md`; flag drift.
 2. **Resolve parent Epic.** Find it via `searchJiraIssuesUsingJql`/`getJiraIssue`; confirm it's the right one.
 3. **Dedup search (GATE).** Check existing Features (especially `parent = <EPIC>`) + semantic overlap. If a duplicate/overlap exists, STOP and ask. **Also check for a stub:** if a match carries `incomplete-ticket`, do NOT create a new Feature — **finish that stub** instead (fill the template, then remove `incomplete-ticket` in the same `editJiraIssue`). See "Stub / placeholder tickets" in `../_reference.md`.
 4. **Fill the template completely** — no raw `{{ }}`.
