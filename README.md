@@ -1,19 +1,43 @@
 # agent-kit
 
 Reusable **agent skills and templates** shared across Daniel's repos. This repo is the single
-source of truth; individual projects consume it as a **git submodule** mounted at
-`.agents/shared/`.
+source of truth. It is consumed two ways:
+
+- as a **Claude Code plugin** (`.claude-plugin/plugin.json`) — skills become first-class,
+  invocable slash commands; and
+- as a **git submodule** mounted at `.agents/shared/` for agents/tools that read the files
+  directly.
+
+Both consumption modes use the same files — the plugin manifest is purely additive.
 
 ## What's in here
 
 ```
-skills/      # agent skills (procedures an agent follows). Currently: skills/jira/
-templates/   # human-readable mirrors of live templates. Currently: templates/jira/
+.claude-plugin/   # plugin.json (manifest) + marketplace.json (self-hosting marketplace)
+skills/           # agent skills (procedures an agent follows)
+  jira/           # create/decompose Epics, Features, Subtasks
+  teamwork-orchestration/   # multi-agent orchestration strategy
+templates/        # human-readable mirrors of live templates. Currently: templates/jira/
 ```
 
 - `skills/jira/` — create/decompose Epics, Features, and Subtasks in Jira, with the shared
   work-claim & lifecycle protocol in `skills/jira/_reference.md`.
+- `skills/teamwork-orchestration/` — orchestrator-owns-integration strategy for executing a
+  plan across a team of dispatched agents.
 - `templates/jira/` — `EPIC.md`, `FEATURE.md`, `SUBTASK.md` reference copies.
+
+## Using agent-kit as a Claude Code plugin
+
+This repo doubles as a single-plugin marketplace. Add it once, then install:
+
+```
+/plugin marketplace add dcassil/agent-kit
+/plugin install agent-kit@agent-kit
+```
+
+Skills are then invocable as slash commands (`/create-epic`, `/create-feature`,
+`/decompose-epic`, `/decompose-feature`, `/teamwork-orchestration`) and auto-trigger from
+their descriptions. Restart / reload Claude Code after installing so skills are scanned.
 
 Paths **inside** this repo are self-contained: skills reference templates by relative path
 (e.g. `../../../templates/jira/EPIC.md`), so they resolve wherever the kit is mounted.

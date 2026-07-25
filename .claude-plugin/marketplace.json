@@ -1,0 +1,14 @@
+{
+  "name": "agent-kit",
+  "owner": {
+    "name": "Daniel Cassil",
+    "email": "me@danielcassil.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-kit",
+      "source": "./",
+      "description": "Jira Epic/Feature/Subtask create + decompose skills, plus the Teamwork multi-agent orchestration strategy."
+    }
+  ]
+}
