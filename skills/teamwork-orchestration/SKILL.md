@@ -45,9 +45,14 @@ This keeps one coordinator responsible for integration so concurrent agents don'
    file + task number, the specific files to create/edit, the acceptance criteria, and the
    explicit "no git, no verification" constraint. Assume it knows nothing else.
 
-5. **Dispatch and monitor.** Launch a wave, then check in on background agents about
-   **every 5 minutes** for hangs (use a scheduled wake-up as a fallback; completion
-   notifications also fire automatically).
+5. **Dispatch and monitor.** As the **sole writer of Jira labels + status**, for each leaf
+   ticket you hand to a worker: first ensure it's **on the board, not the backlog** — a ticket
+   still in `Needs Visual Design` is design-blocked and not ready to work. Otherwise, in the same
+   beat, add `working-<your-handle>` and transition its status to **In Progress** (`31`), which
+   moves it onto the board (see the Status-transitions and Backlog-vs-board notes in
+   [`../_reference.md`](../_reference.md)). Then launch the wave and check in on background
+   agents about **every 5 minutes** for hangs (use a scheduled wake-up as a fallback;
+   completion notifications also fire automatically). Workers never touch Jira.
 
 6. **Integrate each wave.** When a wave completes, run lint / typecheck / build, fix or
    re-dispatch anything broken, then commit the wave to **your feature branch** (in your
@@ -76,6 +81,11 @@ This keeps one coordinator responsible for integration so concurrent agents don'
    If a merge must happen in a shared tree anyway, first confirm it is clean (`git status`
    empty) and on the expected branch; if not, stop — do not stash another primary's work.
 
+   **After the merge to `develop` is pushed and green**, close out each ticket that shipped in
+   this wave: in one `editJiraIssue` remove `working-<your-handle>` and add `finished`, and
+   transition status → **In Review** (`41`). (Status becomes **Done** (`51`) only when the
+   human promotes `develop` → `main` — never push `main` yourself.)
+
 8. **Advance** to the next wave and repeat until the plan is done.
 
 ## Guardrails
@@ -103,6 +113,6 @@ Branch names, protected branches, work-claim/label protocol, and registry locati
 the host repo's `AGENTS.md` — read it before orchestrating. For `shore_works`: the integration
 branch is `develop` (primaries merge there via step 7); `main` is promoted only by the human;
 owned agents are registered in `.agents/agents-registry.md`; work is claimed via the Jira
-lifecycle labels in `skills/jira/_reference.md`; and coordination scratch lives at the
+lifecycle labels **and status transitions** in [`../_reference.md`](../_reference.md); and coordination scratch lives at the
 orchestration-root `.agents/` (`work-log.md`, `agents-registry.md`, `DECISIONS-NEEDED.md`,
 `PRODUCT-DECISIONS.md`).

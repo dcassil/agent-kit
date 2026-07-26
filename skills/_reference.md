@@ -208,6 +208,49 @@ Rules enforced by the `create-*` and `decompose-*` skills:
 - **Feature:** `decomposing-<h>` → `decomposed` → `working-<h>` → `finished`.
 - **Subtask (leaf):** `working-<h>` → `finished` (never decomposed).
 
+### Status transitions (labels AND status move together)
+
+The label lifecycle is the machine-readable claim; **Jira `status` is the human-readable
+mirror** and MUST be advanced in lockstep so the board never goes stale. Every label
+transition below also carries a status transition, done in the **same `editJiraIssue`/
+`transitionJiraIssue` pair** (labels via `editJiraIssue`, status via `transitionJiraIssue`).
+
+**SCA transition ids (global — available from any status):**
+
+| Target status | transition `id` | Meaning |
+|---|---|---|
+| `To Do` | `21` | ready to be worked (created / decomposed) |
+| `In Progress` | `31` | a worker is actively implementing it (`working-<h>` set) |
+| `In Review` | `41` | code-complete + merged to the integration branch (`develop`), awaiting promotion (`finished` set) |
+| `Done` | `51` | promoted to `main` |
+| `Needs Visual Design` | `11` | genuinely blocked on design (NOT a resting state) |
+| `Defered` | `2` | parked |
+
+Get the live ids with `getTransitionsForJiraIssue` if a workflow changes; the names above
+are canonical.
+
+**Status ⇄ label mapping (the rule):**
+
+| Event | Label change | Status transition |
+|---|---|---|
+| Ticket **created** (create-*/decompose-*) | — | → **To Do** (`21`) unless design-blocked → `Needs Visual Design` |
+| **Start work** (primary hands leaf to a worker) | add `working-<h>` | → **In Progress** (`31`) |
+| **Finish work** (primary verified + merged to `develop`) | remove `working-<h>`, add `finished` | → **In Review** (`41`) |
+| **Promoted to `main`** (human/orchestrator) | (label stays `finished`) | → **Done** (`51`) |
+| **Abort/failure** of a work phase | remove `working-<h>` | back → **To Do** (`21`) |
+
+**Backlog vs board (Kanban):** SCA is a Kanban board with the Backlog enabled. The **backlog**
+is the default-create status **`Needs Visual Design`** (`new` category); the **board** is
+everything from **`To Do`** rightward (`To Do` → `In Progress` → `In Review` → `Done`). So
+"put it on the board" = move it out of `Needs Visual Design` to at least `To Do` (`21`). A ticket
+must be **on the board before it is decomposed or worked** — never decompose/work something still
+sitting in the `Needs Visual Design` backlog (unless it genuinely still needs design).
+
+> **Why "In Review" for `finished` and not "Done":** `finished` means the primary merged the
+> worker's output into the integration branch — the code is complete but not yet on `main`.
+> **Done is reserved for `main`.** New tickets must NOT be left in the `Needs Visual Design`
+> default; move them to `To Do` on creation unless they truly need design first.
+
 ### Claiming a phase (GATE — before decomposing OR before working an item)
 
 `getJiraIssue` and inspect labels:
@@ -223,13 +266,23 @@ same kind now exist (two teams raced the check→claim window), the **lowest-sor
 handle wins**; every other owner removes its own lock and backs off. (No
 compare-and-swap exists in the API — this reconciliation closes the gap.)
 
-### Transitions (each is ONE `editJiraIssue`, remove + add together)
+**Board gate (before decomposing OR working):** once you hold the claim, if the item's status
+is still `Needs Visual Design` (the Kanban backlog), **move it onto the board first** — transition
+to `To Do` (`21`) if you're about to decompose it, or `In Progress` (`31`) if you're about to work
+it. Do not decompose or work an item that is still sitting in the backlog. (Exception: if it
+genuinely still needs design, it stays in `Needs Visual Design` and is not ready to work.)
 
-- Finish decomposing: remove `decomposing-<h>`, add `decomposed`.
+### Transitions (labels via `editJiraIssue`, status via `transitionJiraIssue` — do both)
+
+- Finish decomposing: remove `decomposing-<h>`, add `decomposed`. (Status unchanged — the
+  Epic/Feature itself isn't being coded; its new children are created in **To Do**.)
 - Start work (e.g. primary hands a subtask to a worker): add `working-<h>`
-  (the `decomposed` marker, if present, stays).
-- Finish work (after the primary verifies + merges the worker's output): remove
-  `working-<h>`, add `finished`.
+  (the `decomposed` marker, if present, stays) **and** transition status → **In Progress**
+  (`31`).
+- Finish work (after the primary verifies + merges the worker's output into `develop`): remove
+  `working-<h>`, add `finished` **and** transition status → **In Review** (`41`).
+- Promote to `main` (human/orchestrator): status → **Done** (`51`); the `finished` label stays.
 
 **On abort/failure of a phase:** remove your lock (`decomposing-<h>` / `working-<h>`)
-so the item isn't left falsely locked; do **not** add the terminal marker.
+so the item isn't left falsely locked; do **not** add the terminal marker; if you had already
+moved it to **In Progress**, transition it back to **To Do** (`21`).

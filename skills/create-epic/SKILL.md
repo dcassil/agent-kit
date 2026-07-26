@@ -13,7 +13,7 @@ Create a top-tier **Epic** (issue type `Epic`, id `10009`, project **SCA**). The
 2. **Dedup search (GATE).** `searchJiraIssuesUsingJql` for existing Epics + `search`/`getTeamworkGraphContext` for semantic overlap. If a plausible duplicate exists, STOP and ask. **Also check for a stub:** if a match carries `incomplete-ticket`, finish that stub instead of creating a new Epic (fill the template, then remove `incomplete-ticket`). See "Stub / placeholder tickets" in `../_reference.md`.
 3. **Fill the template completely** — no raw `{{ }}`; sanctioned fallbacks only.
 4. **Review gate.** Show the rendered ticket; get approval before writing (unless told to proceed).
-5. **Create.** `createJiraIssue` (SCA, `Epic`) with summary + completed ADF description.
+5. **Create.** `createJiraIssue` (SCA, `Epic`) with summary + completed ADF description. **Then set status to `To Do`** (`transitionJiraIssue`, id `21`) so it doesn't linger in the `Needs Visual Design` default. See the Status-transitions table in [`../_reference.md`](../_reference.md).
 6. **Report** key + URL; log per `AGENTS.md`.
 
 ## Gates specific to this skill

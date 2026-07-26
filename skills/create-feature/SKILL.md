@@ -14,7 +14,7 @@ Create a **Feature** (issue type `Feature`, id `10013`, project **SCA**) as a ch
 3. **Dedup search (GATE).** Check existing Features (especially `parent = <EPIC>`) + semantic overlap. If a duplicate/overlap exists, STOP and ask. **Also check for a stub:** if a match carries `incomplete-ticket`, do NOT create a new Feature — **finish that stub** instead (fill the template, then remove `incomplete-ticket` in the same `editJiraIssue`). See "Stub / placeholder tickets" in `../_reference.md`.
 4. **Fill the template completely** — no raw `{{ }}`.
 5. **Review gate.** Show the rendered ticket; get approval before writing.
-6. **Create + parent.** `createJiraIssue` (SCA, `Feature`, `parent: <EPIC-KEY>` — native parent field). Verify the parent resolved.
+6. **Create + parent.** `createJiraIssue` (SCA, `Feature`, `parent: <EPIC-KEY>` — native parent field). Verify the parent resolved. **Then set status to `To Do`** (`transitionJiraIssue`, id `21`) so it doesn't linger in the `Needs Visual Design` default — unless it genuinely needs design first (use `Needs Visual Design`, id `11`). See the Status-transitions table in [`../_reference.md`](../_reference.md).
 7. **Report** key + URL; log per `AGENTS.md`.
 
 ## Gates specific to this skill
