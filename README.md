@@ -14,6 +14,9 @@ Both consumption modes use the same files — the plugin manifest is purely addi
 
 ```
 .claude-plugin/   # plugin.json (manifest) + marketplace.json (self-hosting marketplace)
+hooks/            # plugin hooks, auto-registered when the plugin is enabled
+  hooks.json                  # PostToolUse (Edit|Write|MultiEdit) → lint the changed file
+  lint-changed-file.mjs       # realtime ESLint feedback for agents (repo-agnostic)
 skills/           # agent skills (procedures an agent follows) — each a top-level dir
   _reference.md               # shared Jira constants/tools, linked by the jira skills
   create-epic/                # create a top-tier Epic
@@ -21,6 +24,7 @@ skills/           # agent skills (procedures an agent follows) — each a top-le
   decompose-epic/             # break an Epic into Features
   decompose-feature/          # break a Feature into Subtasks
   teamwork-orchestration/     # multi-agent orchestration strategy
+  setup-robust-lint/          # stand up architecture-enforcing ESLint (guided authoring)
 templates/        # human-readable mirrors of live templates. Currently: templates/jira/
 ```
 
@@ -32,7 +36,21 @@ level deep — `skills/<name>/SKILL.md`).
   and IDs in `skills/_reference.md`.
 - `teamwork-orchestration` — orchestrator-owns-integration strategy for executing a plan
   across a team of dispatched agents.
+- `setup-robust-lint` — guided authoring of architecture-enforcing ESLint (boundaries matrix /
+  layer DAG, quality caps, barrel/index bans, env fence) with rich pattern-suggesting messages,
+  on-save wiring, and an enforcement-verification gate. Carries the hard-won gotchas (the
+  `eslint-plugin-boundaries` **v5-not-v7** pin, `engine-strict`, resolvable-import probing).
 - `templates/jira/` — `EPIC.md`, `FEATURE.md`, `SUBTASK.md` reference copies.
+
+## Bundled hook — realtime lint feedback for agents
+
+`hooks/hooks.json` registers a **PostToolUse** hook (matcher `Edit|Write|MultiEdit`) that runs
+`hooks/lint-changed-file.mjs` on every edited `.ts`/`.tsx`. The script walks up from the edited
+file to the nearest `eslint.config.mjs`, lints just that file with the owning app's `eslint_d`,
+and (on violations) returns the messages to the agent so it fixes them immediately. It is
+**repo-agnostic and zero-config** — enabling the plugin auto-registers it; no per-repo
+`.claude/settings.json` edits. Pairs naturally with `setup-robust-lint`, but works with any repo
+that has a flat ESLint config.
 
 ## Using agent-kit as a Claude Code plugin
 

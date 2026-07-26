@@ -1,0 +1,11 @@
+{
+  // On-save ESLint feedback for humans. Copy to the repo's .vscode/settings.json.
+  // "mode: auto" resolves the nearest package.json as the working dir, so a
+  // multi-app repo lints each app against its own flat config + plugins.
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.run": "onType",
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "editor.formatOnSave": false
+}
