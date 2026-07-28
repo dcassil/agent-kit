@@ -1,7 +1,8 @@
 # Jira Reference (Shore Works)
 
 Shared constants, tools, and conventions used by every Jira skill in this kit
-(`create-epic`, `create-feature`, `decompose-epic`, `decompose-feature`). Skills link here
+(`create-epic`, `create-feature`, `decompose-epic`, `decompose-feature`,
+`check-existing-tickets`). Skills link here
 instead of repeating this.
 
 ## Site / IDs
@@ -55,7 +56,7 @@ Load schemas on demand with ToolSearch (`select:<name>`), then call.
 - `getIssueLinkTypes`, `getTransitionsForJiraIssue`, `lookupJiraAccountId`
 
 **Write**
-- `createJiraIssue` — create Product/Feature/Slice/Task
+- `createJiraIssue` — create Epic/Feature/Subtask tickets
 - `editJiraIssue` — amend fields after creation
 - `createIssueLink` — link child ↔ parent / related
 - `addCommentToJiraIssue`, `transitionJiraIssue`, `addWorklogToJiraIssue`
@@ -67,6 +68,8 @@ Load schemas on demand with ToolSearch (`select:<name>`), then call.
 - **Supabase** / **Vercel** MCP — for codebase investigation during decompose
   steps (schema, deployments).
 - `Explore` / `general-purpose` agents — for codebase investigation fan-out.
+- `check-existing-tickets` skill — mandatory overlap index used before creating
+  or decomposing Jira work.
 
 ## Querying / listing issues (avoid huge payloads)
 
@@ -131,6 +134,41 @@ searchJiraIssuesUsingJql({
 so you get related-ticket numbers and titles without expanding each one. Then
 `getJiraIssue` only the specific tickets you need in full.
 
+## Agent ticket index block (Feature + Subtask descriptions)
+
+Every **Feature** and **Subtask** description MUST begin with this greppable block,
+before the normal template body. In this hierarchy, "task ticket" means the Subtask
+leaf tier; the raw Jira Task issue type is not used. The block is both human-readable
+and machine-readable enough for agents to screen new work against active Jira tickets.
+
+```
+AGENT_TICKET_INDEX_START
+Summary:
+<2-3 short lines explaining purpose and why>
+
+Features:
+- <5-7 word capability or behavior phrase>
+- <5-7 word capability or behavior phrase>
+
+Areas:
+- <5-7 word code, module, or service phrase>
+- <5-7 word code, module, or service phrase>
+AGENT_TICKET_INDEX_END
+```
+
+Rules:
+
+- Use the exact start and stop markers: `AGENT_TICKET_INDEX_START` and
+  `AGENT_TICKET_INDEX_END`.
+- Keep the block at the very top of the Jira description. If the ticket is an
+  `incomplete-ticket` stub, the stub warning may precede it; otherwise nothing does.
+- Write 2-3 short `Summary` lines that state what the ticket is for and why it exists.
+- Keep every `Features` and `Areas` bullet terse, ideally 5-7 words.
+- Name concrete capabilities and touched areas, not vague categories.
+- Use `Unknown investigation required` only when genuinely unknown.
+- This block does not replace the detailed template sections; it is the search index
+  agents use before reading full descriptions.
+
 ## Global gates (apply to ALL jira skills)
 
 1. **Read the live template first.** Always fetch
@@ -142,17 +180,24 @@ so you get related-ticket numbers and titles without expanding each one. Then
    replaced. If a value is genuinely unknown, write the template's sanctioned
    fallback (e.g. "Unknown — investigation required", "Not Applicable",
    "None"), never a raw `{{ }}`.
-3. **Dedup before create.** Never create a Product/Feature without first
-   searching for an existing same/similar item (JQL + Rovo/Teamwork Graph). If
-   a likely duplicate exists, STOP and ask the user.
-4. **Confirm before write.** Creating/linking Jira issues is outward-facing.
+3. **Dedup before create.** Never create a Jira ticket without first searching
+   for an existing same/similar item (JQL + Rovo/Teamwork Graph). If a likely
+   duplicate exists, STOP and ask the user.
+4. **Check the active ticket index before create/decompose.** Before creating any
+   Jira ticket or decomposing an Epic/Feature, run the `check-existing-tickets`
+   skill. Compare the proposed scope against the returned index blocks, issue
+   keys, status, timestamps, parents, and linked tickets. If any active ticket
+   may overlap, fetch its full description with `getJiraIssue` and work
+   interactively with the user to merge, split, link, close, or align scope before
+   creating or decomposing anything.
+5. **Confirm before write.** Creating/linking Jira issues is outward-facing.
    Show the fully-rendered ticket body and get explicit approval before calling
    `createJiraIssue`, unless the user has said to proceed without asking.
-5. **Correct project + type.** Default to project **SCA** and the issue-type id
+6. **Correct project + type.** Default to project **SCA** and the issue-type id
    named in each skill. Confirm if the user implies a different project.
-6. **Link to parent.** Child tickets (Feature, Feature Slice, Task) must be
+7. **Link to parent.** Child tickets (Feature and Subtask) must be
    linked to their parent on creation. Verify the link resolved.
-7. **Report the key + URL** of anything created, and log it per `AGENTS.md`
+8. **Report the key + URL** of anything created, and log it per `AGENTS.md`
    work-claim conventions when running alongside other agents.
 
 ## Work claim & lifecycle protocol (applies to `decompose-*` skills and to working any item)

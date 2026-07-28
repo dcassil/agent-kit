@@ -8,6 +8,23 @@ HIERARCHY (Jira-native, this project): Epic → Feature → Subtask.
 THIS TEMPLATE IS FOR THE **FEATURE** TIER.
 -->
 
+AGENT_TICKET_INDEX_START
+Summary:
+{{ What this feature is for. }}
+{{ Why this feature should exist. }}
+{{ Expected outcome or user value. }}
+
+Features:
+- {{ Major capability added or changed }}
+- {{ User behavior changed or enabled }}
+- {{ Business rule added or changed }}
+
+Areas:
+- {{ App module package or service }}
+- {{ Component endpoint table or workflow }}
+- {{ Test surface or validation area }}
+AGENT_TICKET_INDEX_END
+
 # {{ Feature Title }}
 
 ## Feature Overview — REQUIRED

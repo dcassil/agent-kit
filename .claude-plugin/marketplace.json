@@ -8,7 +8,7 @@
     {
       "name": "agent-kit",
       "source": "./",
-      "description": "Jira Epic/Feature/Subtask create + decompose skills, plus the Teamwork multi-agent orchestration strategy."
+      "description": "Jira Epic/Feature/Subtask create + decompose skills with active-ticket overlap checks, plus the Teamwork multi-agent orchestration strategy."
     }
   ]
 }

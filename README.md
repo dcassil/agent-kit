@@ -21,6 +21,7 @@ skills/           # agent skills (procedures an agent follows) — each a top-le
   _reference.md               # shared Jira constants/tools, linked by the jira skills
   create-epic/                # create a top-tier Epic
   create-feature/             # create a Feature under an Epic
+  check-existing-tickets/     # index active Jira tickets before creating/decomposing
   decompose-epic/             # break an Epic into Features
   decompose-feature/          # break a Feature into Subtasks
   teamwork-orchestration/     # multi-agent orchestration strategy
@@ -31,9 +32,11 @@ templates/        # human-readable mirrors of live templates. Currently: templat
 Skills are **top-level dirs** under `skills/` (Claude Code plugin discovery only scans one
 level deep — `skills/<name>/SKILL.md`).
 
+- `check-existing-tickets` — query active Jira tickets, extract the greppable agent ticket
+  index block, and return structured overlap data before new ticket creation or decomposition.
 - `create-epic` / `create-feature` / `decompose-epic` / `decompose-feature` — create and
-  decompose Epics, Features, and Subtasks in Jira, sharing the work-claim & lifecycle protocol
-  and IDs in `skills/_reference.md`.
+  decompose Epics, Features, and Subtasks in Jira, sharing the work-claim & lifecycle protocol,
+  active-ticket overlap check, and IDs in `skills/_reference.md`.
 - `teamwork-orchestration` — orchestrator-owns-integration strategy for executing a plan
   across a team of dispatched agents.
 - `setup-robust-lint` — guided authoring of architecture-enforcing ESLint (boundaries matrix /
@@ -62,8 +65,9 @@ This repo doubles as a single-plugin marketplace. Add it once, then install:
 ```
 
 Skills are then invocable as slash commands (`/create-epic`, `/create-feature`,
-`/decompose-epic`, `/decompose-feature`, `/teamwork-orchestration`) and auto-trigger from
-their descriptions. Restart / reload Claude Code after installing so skills are scanned.
+`/check-existing-tickets`, `/decompose-epic`, `/decompose-feature`,
+`/teamwork-orchestration`) and auto-trigger from their descriptions. Restart / reload Claude
+Code after installing so skills are scanned.
 
 Paths **inside** this repo are self-contained: skills reference templates by relative path
 (e.g. `../../../templates/jira/EPIC.md`), so they resolve wherever the kit is mounted.

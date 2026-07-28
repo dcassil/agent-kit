@@ -5,20 +5,23 @@ description: Use when the user wants to create a new Feature in Jira under an Ep
 
 # Create Feature
 
-Create a **Feature** (issue type `Feature`, id `10013`, project **SCA**) as a child of an Epic. See [`../_reference.md`](../_reference.md) for IDs, tools, hierarchy, and global gates (all apply).
+Create a **Feature** (issue type `Feature`, id `10013`, project **SCA**) as a child of an Epic. See [`../_reference.md`](../_reference.md) for IDs, tools, hierarchy, the mandatory active-ticket overlap check, and global gates (all apply).
 
 ## Steps
 
 1. **Load the live template.** `getJiraIssueTypeMetaWithFields` (SCA, issueTypeId `10013`, `requiredFieldsOnly:false`). Source of truth = description `defaultValue`; cross-check `../../templates/jira/FEATURE.md`; flag drift.
 2. **Resolve parent Epic.** Find it via `searchJiraIssuesUsingJql`/`getJiraIssue`; confirm it's the right one.
-3. **Dedup search (GATE).** Check existing Features (especially `parent = <EPIC>`) + semantic overlap. If a duplicate/overlap exists, STOP and ask. **Also check for a stub:** if a match carries `incomplete-ticket`, do NOT create a new Feature — **finish that stub** instead (fill the template, then remove `incomplete-ticket` in the same `editJiraIssue`). See "Stub / placeholder tickets" in `../_reference.md`.
-4. **Fill the template completely** — no raw `{{ }}`.
-5. **Review gate.** Show the rendered ticket; get approval before writing.
-6. **Create + parent.** `createJiraIssue` (SCA, `Feature`, `parent: <EPIC-KEY>` — native parent field). Verify the parent resolved. **Then set status to `To Do`** (`transitionJiraIssue`, id `21`) so it doesn't linger in the `Needs Visual Design` default — unless it genuinely needs design first (use `Needs Visual Design`, id `11`). See the Status-transitions table in [`../_reference.md`](../_reference.md).
-7. **Report** key + URL; log per `AGENTS.md`.
+3. **Active-ticket overlap check (GATE).** Run the `check-existing-tickets` skill using the proposed Feature scope and parent Epic. Review the returned JSON for overlapping active tickets. If any `high` or `medium` overlap candidates exist, fetch each full description with `getJiraIssue` and work interactively with the user to merge, split, link, close, or align scope before creating anything.
+4. **Dedup search (GATE).** Check existing Features (especially `parent = <EPIC>`) + semantic overlap. If a duplicate/overlap exists, STOP and ask. **Also check for a stub:** if a match carries `incomplete-ticket`, do NOT create a new Feature — **finish that stub** instead (fill the template, then remove `incomplete-ticket` in the same `editJiraIssue`). See "Stub / placeholder tickets" in `../_reference.md`.
+5. **Fill the template completely** — no raw `{{ }}`. The description MUST begin with the `AGENT_TICKET_INDEX_START` / `AGENT_TICKET_INDEX_END` block from `../_reference.md`: 2-3 short summary lines, then terse `Features` and `Areas` bullets.
+6. **Review gate.** Show the rendered ticket; get approval before writing.
+7. **Create + parent.** `createJiraIssue` (SCA, `Feature`, `parent: <EPIC-KEY>` — native parent field). Verify the parent resolved. **Then set status to `To Do`** (`transitionJiraIssue`, id `21`) so it doesn't linger in the `Needs Visual Design` default — unless it genuinely needs design first (use `Needs Visual Design`, id `11`). See the Status-transitions table in [`../_reference.md`](../_reference.md).
+8. **Report** key + URL; log per `AGENTS.md`.
 
 ## Gates specific to this skill
 - Must be parented to an Epic (native `parent`).
+- Must run `check-existing-tickets` before creating; full-read likely overlaps and resolve with the user.
+- Must include the top `AGENT_TICKET_INDEX_*` block with short summary, feature bullets, and code-area bullets.
 - No creation if an equivalent Feature exists — and if a matching `incomplete-ticket` stub exists, finish it instead of creating a new one.
 - Every REQUIRED template section populated — unless deliberately creating a stub, which MUST carry the `incomplete-ticket` label and a "⚠️ INCOMPLETE — stub" note (see `../_reference.md`).
 - If the feature is too large, prefer splitting into multiple sibling Features under the Epic — there is no slice tier.

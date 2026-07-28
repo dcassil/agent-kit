@@ -1,12 +1,12 @@
 {
   "name": "agent-kit",
-  "version": "0.3.0",
-  "description": "Daniel's reusable agent skills: Jira Epic/Feature/Subtask create + decompose workflows, the Teamwork multi-agent orchestration strategy, and setup-robust-lint (architecture-enforcing ESLint). Ships a PostToolUse hook that gives agents realtime ESLint feedback on every edit.",
+  "version": "0.3.1",
+  "description": "Daniel's reusable agent skills: Jira Epic/Feature/Subtask create + decompose workflows with active-ticket overlap checks, the Teamwork multi-agent orchestration strategy, and setup-robust-lint (architecture-enforcing ESLint). Ships a PostToolUse hook that gives agents realtime ESLint feedback on every edit.",
   "author": {
     "name": "Daniel Cassil",
     "email": "me@danielcassil.com"
   },
   "homepage": "https://github.com/dcassil/agent-kit",
   "repository": "https://github.com/dcassil/agent-kit",
-  "keywords": ["jira", "orchestration", "multi-agent", "workflow", "skills", "eslint", "lint", "architecture", "guard-rails", "hooks"]
+  "keywords": ["jira", "overlap-check", "orchestration", "multi-agent", "workflow", "skills", "eslint", "lint", "architecture", "guard-rails", "hooks"]
 }
